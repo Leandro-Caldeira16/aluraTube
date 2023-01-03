@@ -1,11 +1,15 @@
 import config from "../config.json";
 import styled from "styled-components";
-import { CSSReset } from "../src/components/CSSReset";
-import Menu from "../src/components/Menu";
+
+import Menu from "../src/components/menu/Index";
 import { StyledTimeline } from "../src/components/Timeline";
+import { useState } from "react";
+
 
 
 function HomePage() {
+
+    const [valorBusca, setValorBusca] = useState("")
 
     const estilosDaPage = {
         // backgroundColor: "red"
@@ -13,11 +17,11 @@ function HomePage() {
 
     return (
         <>
-            <CSSReset />
+            
             <div style={estilosDaPage}>
-                <Menu />
+                <Menu valorBusca={valorBusca} setValorBusca={setValorBusca}/>
                 <Header />
-                <Timeline playlists={config.playlists} />
+                <Timeline playlists={config.playlists} valorDoInput={valorBusca} />
             </div>
         </>
     )
@@ -34,28 +38,43 @@ export default HomePage
 //   }
 
 const StyledHeader = styled.div`
-    img{
+
+    background-color: ${({ theme }) => theme.backgroundLevel1};
+
+    .imgPerfil{
         width:80px;
         height:80px;
         border-radius:50px;
     }
     .user-info{
-        margin-top: 50px;
         display: flex;
         align-items: center;
         padding: 16px 32px;
         gap: 16px;
 
     }
+
+    img{
+        width: 100%;
+        height: 300px;
+    }
+  `;
+
+  const StyleBanner = styled.div`
+
+    /* background-image: url(${config.bg}); */
+    background-image: url(${ ({bg})=> bg });
+    height: 230px;
   `;
 
 function Header() {
     return (
         <StyledHeader>
-            {/* <img src="banner"/> */}
+            
+            <StyleBanner bg={config.bg}/>
             <section className="user-info">
 
-                <img src={`https://github.com/${config.github}.png`} />
+                <img className="imgPerfil" src={`https://github.com/${config.github}.png`} />
 
                 <div>
                     <h2>{config.name}</h2>
@@ -72,33 +91,37 @@ function Header() {
     )
 }
 
-function Timeline(propriedades) {
-    console.log("dentro", propriedades.playlists);
+function Timeline({valorDoInput, ...propriedades}) {
     const playlistNames = Object.keys(propriedades.playlists);
-    console.log(playlistNames);
-
-
-
+    
     return (
         <StyledTimeline>
+
+            
             {playlistNames.map((playlistName) => {
 
                 const videos = propriedades.playlists[playlistName];
-                console.log(playlistName);
-                console.log(videos);
 
                 return (
-                    <section>
+                    <section key={playlistName.length}>
                         <h2>{playlistName}</h2>
                         <div>
-                            {videos.map((video) => {
+                            {videos.filter((video)=>{
+                                return(
+                                    
+                                    video.title.toUpperCase().includes(valorDoInput.toUpperCase())
+                                )
+                            }).map((video) => {
                                 return (
-                                    <a href={video.url}>
-                                        <img src={video.thumb} />
-                                        <span>
-                                            {video.title}
-                                        </span>
-                                    </a>
+                                    <div key={video.url}>
+                                        <a href={video.url}>
+                                            <img src={video.thumb} />
+                                            <span>
+                                                {video.title}
+                                            </span>
+                                            
+                                        </a>
+                                    </div>
                                 )
                             })}
                         </div>
